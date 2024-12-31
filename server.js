@@ -23,16 +23,24 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const botName = "ChatCord Bot";
 
+// Redis setup
 (async () => {
-pubClient = createClient({ url: "redis://127.0.0.1:6380" });
-z  await pubClient.connect();
-  subClient = pubClient.duplicate();
-  io.adapter(createAdapter(pubClient, subClient));
+  try {
+    const pubClient = createClient({ url: "redis://127.0.0.1:6380" });
+    await pubClient.connect();
+
+    const subClient = pubClient.duplicate();
+    io.adapter(createAdapter(pubClient, subClient));
+    console.log("Redis clients connected successfully.");
+  } catch (error) {
+    console.error("Error connecting to Redis:", error);
+  }
 })();
 
 // Run when client connects
 io.on("connection", (socket) => {
   console.log(io.of("/").adapter);
+
   socket.on("joinRoom", ({ username, room }) => {
     const user = userJoin(socket.id, username, room);
 
